@@ -29,7 +29,6 @@ class SimplePaymentClass(AbstractInteractionClient):
         }
 
     async def charge(self, amount: float, card: str, ip: str,
-                     invoice_id: Optional[str] = None,
                      description: Optional[str] = None):
         """
         :param amount: float
