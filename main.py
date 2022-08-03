@@ -56,7 +56,9 @@ class SimplePaymentClass(AbstractInteractionClient):
                 data=data,
             )
         except InteractionResponseError as e:
+            # TODO: Need to return something
             raise InteractionResponseError(status_code=e.status_code, method=e.method, service=e.service)
+
         if not response["Success"]:
             return f"somethin went wrong!"
 
