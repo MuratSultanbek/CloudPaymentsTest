@@ -1,3 +1,4 @@
+import hashlib
 import base64
 from aiohttp import TCPConnector
 
@@ -28,8 +29,7 @@ class SimplePaymentClass(AbstractInteractionClient):
             "Authorization": f"Basic {b64str}",
         }
 
-    async def charge(self, amount: float, card: str, ip: str,
-                     description: Optional[str] = None):
+    async def charge(self, amount: float, card: str, ip: str, description: Optional[str] = None):
         """
         :param amount: float
         :param card: str
@@ -37,6 +37,10 @@ class SimplePaymentClass(AbstractInteractionClient):
         :param invoice_id: str
         :param description: str
         """
+
+        self.headers["X-Request-ID"] = self.get_idempotent_request_id(
+            amount=amount, card=card
+        )
 
         data = {
             "PublicId": self.public_id,
@@ -60,6 +64,11 @@ class SimplePaymentClass(AbstractInteractionClient):
             raise InteractionResponseError(status_code=e.status_code, method=e.method, service=e.service)
 
         if not response["Success"]:
-            return f"somethin went wrong!"
+            return f"Something went wrong!" # TODO: Need to return something
 
         return response
+
+    def get_idempotent_request_id(self, amount: float, card: str) -> str:
+        _hash = hashlib.new('md5')
+        _hash.update(f'{amount} {card}'.encode('utf-8'))
+        return _hash.hexdigest()
